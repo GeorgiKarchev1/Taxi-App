@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taxi Service</title>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+
+        .navbar {
+            background-color: #2d2d2d;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-buttons button {
+            background-color: #ffd700; /* Yellow background */
+            color: #000; /* Black text */
+            border: none;
+            padding: 0.8rem 1.5rem; /* Padding for buttons */
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .nav-buttons button:hover {
+            background-color: #ffed4a; /* Lighter yellow on hover */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .hero-section {
+            text-align: center;
+            padding: 4rem 1rem;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1499353965760-b85389474bef?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3Dw=1200') center/cover;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px; 
+        }
+
+        .hero-section h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #ffd700;
+        }
+
+        .hero-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .hero-section .order-button {
+            background-color: #ffd700; /* Match the button style */
+            color: #000; /* Text color */
+            border: none;
+            padding: 0.8rem 1.5rem; /* Match padding of other buttons */
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            min-width: 200px; /* Ensure consistent width */
+            animation: pulse 2s infinite; /* Add animation */
+        }
+
+        .hero-section .order-button:hover {
+            background-color: #ffed4a; /* Hover effect */
+        }
+
+        /* Define the pulse animation */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+        }
+
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #2d2d2d;
+            margin: auto;
+            padding: 2rem;
+            border: 1px solid #444;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .close-button {
+            background-color: #ffd700; /* Match the button style */
+            color: #000; /* Text color */
+            border: none;
+            padding: 0.8rem 1.5rem; /* Match padding of other buttons */
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.3s;
+            display: block; /* Make it a    block element */
+            width: 100%; /* Full width */
+        }
+
+        .close-button:hover {
+            background-color: #ffed4a; /* Hover effect */
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: #2d2d2d;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card i {
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+        }
+
+        .price-list {
+            background: #2d2d2d;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .price-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #444;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .nav-buttons {
+                display: none;
+            }
+
+            .mobile-menu {
+                display: block;
+            }
+        }
+
+        .map-section {
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .map-section h2 {
+            color: #ffd700;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+            margin: 0 auto;
+        }
+
+        .map-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            margin-top: 2rem;
+            height: 400px;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .route-calculator {
+            background: #2d2d2d;
+            padding: 1.5rem;
+            border-radius: 10px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .route-calculator h3 {
+            color: #ffd700;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .route-calculator select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .price-display {
+            background: #1a1a1a;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        .price-display .amount {
+            color: #ffd700;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .calculate-btn {
+            background-color: #ffd700;
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .calculate-btn:hover {
+            background-color: #ffed4a;
+        }
+
+        @media (max-width: 768px) {
+            .map-container {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+
+            #map {
+                height: 400px;
+            }
+
+            .route-calculator {
+                height: auto;
+            }
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 5px;
+            z-index: 100;
+        }
+
+        .hamburger span {
+            background: #ffd700;
+            height: 3px;
+            width: 25px;
+            margin: 3px 0;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hamburger animation classes */
+        .hamburger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+
+        .hamburger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .hamburger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+
+        @media (max-width: 768px) {
+            .hamburger {
+                display: flex;
+            }
+
+            .nav-buttons {
+                display: none;
+                position: fixed;
+                top: 0;
+                right: 0;
+                height: 100vh;
+                width: 250px;
+                background: rgba(45, 45, 45, 0.8); /* Semi-transparent background */
+                backdrop-filter: blur(8px); /* Glass effect */
+                -webkit-backdrop-filter: blur(8px); /* For Safari */
+                flex-direction: column;
+                padding: 80px 20px 20px;
+                gap: 1rem;
+                box-shadow: -2px 0 5px rgba(0,0,0,0.2),
+                            inset 0 0 0 1px rgba(255, 255, 255, 0.1); /* Subtle border */
+                transition: all 0.3s ease;
+                border-left: 1px solid rgba(255, 255, 255, 0.1); /* Subtle left border */
+            }
+
+            .nav-buttons.active {
+                display: flex;
+            }
+
+            .nav-buttons button {
+                background: rgba(255, 215, 0, 0.9); /* Slightly transparent buttons */
+                backdrop-filter: blur(4px);
+                -webkit-backdrop-filter: blur(4px);
+                transition: all 0.3s ease;
+            }
+
+            .nav-buttons button:hover {
+                background: rgba(255, 237, 74, 0.9);
+                transform: translateX(-5px); /* Slight hover animation */
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <i class="fas fa-taxi"></i>
+            TaxiService
+        </div>
+        <div class="nav-buttons" id="navButtons">
+            <button onclick="showPrices()" class="secondary-button">
+                <i class="fas fa-tag"></i> Taxi Prices
+            </button>
+            <button onclick="window.location.href='login.html'" id="loginBtn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
+            <button onclick="window.location.href='register.html'" id="registerBtn">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+            <button onclick="logout()" id="logoutBtn" style="display: none;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+        <div class="hamburger" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="hero-section">
+            <h1><i class="fas fa-star"></i> Welcome to TaxiService</h1>
+            <p>Fast, reliable, and comfortable rides at your service</p>
+            <button class="order-button" onclick="orderNow()">
+                <i class="fas fa-car"></i> Order Now
+            </button>
+        </section>
+
+        <div class="features">
+            <div class="feature-card">
+                <i class="fas fa-bolt"></i>
+                <h3>Quick Booking</h3>
+                <p>Book your taxi in just a few clicks</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-dollar-sign"></i>
+                <h3>Best Prices</h3>
+                <p>Competitive rates for all destinations</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-clock"></i>
+                <h3>24/7 Service</h3>
+                <p>Available whenever you need us</p>
+            </div>
+        </div>
+
+        <div class="map-section">
+            <h2><i class="fas fa-map-marker-alt"></i> Find Us</h2>
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="route-calculator">
+                    <h3><i class="fas fa-route"></i> Calculate Your Ride</h3>
+                    <select id="fromLocation">
+                        <option value="">Select pickup location</option>
+                        <option value="center">City Center</option>
+                        <option value="station">Train Station</option>
+                        <option value="mall">Mall Plovdiv</option>
+                        <option value="university">University</option>
+                        <option value="airport">Airport</option>
+                    </select>
+                    <select id="toLocation">
+                        <option value="">Select destination</option>
+                        <option value="center">City Center</option>
+                        <option value="station">Train Station</option>
+                        <option value="mall">Mall Plovdiv</option>
+                        <option value="university">University</option>
+                        <option value="airport">Airport</option>
+                    </select>
+                    <button class="calculate-btn" onclick="calculatePrice()">
+                        <i class="fas fa-calculator"></i> Calculate Price
+                    </button>
+                    <div class="price-display">
+                        <div>Estimated Price:</div>
+                        <div class="amount" id="priceAmount">$0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Taxi Prices -->
+    <div id="priceModal" class="modal">
+        <div class="modal-content">
+            <h2><i class="fas fa-tag"></i> Our Prices</h2>
+            <div class="price-item">
+                <span>City Ride</span>
+                <span>$10</span>
+            </div>
+            <div class="price-item">
+                <span>Airport Transfer</span>
+                <span>$50</span>
+            </div>
+            <div class="price-item">
+                <span>Hourly Rate</span>
+                <span>$30/hour</span>
+            </div>
+            <button class="close-button" onclick="closePrices()">
+                <i class="fas fa-times"></i> Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function showPrices() {
+            const modal = document.getElementById('priceModal');
+            modal.style.display = 'flex'; // Show the modal
+        }
+
+        function closePrices() {
+            const modal = document.getElementById('priceModal');
+            modal.style.display = 'none'; // Hide the modal
+        }
+
+        function orderNow() {
+            // Get the map section element
+            const mapSection = document.querySelector('.map-section');
+            
+            // Scroll to the map section smoothly
+            mapSection.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'center'
+            });
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('priceModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // Define locations with their coordinates and base prices
+        const locations = {
+            center: { lat: 42.1354, lng: 24.7453, name: "City Center" },
+            station: { lat: 42.1341, lng: 24.7401, name: "Train Station" },
+            mall: { lat: 42.1333, lng: 24.7552, name: "Mall Plovdiv" },
+            university: { lat: 42.1419, lng: 24.7526, name: "University" },
+            airport: { lat: 42.0678, lng: 24.8508, name: "Airport" }
+        };
+
+        // Initialize the map and other variables
+        let routeLine;
+        let markers = [];
+
+        function calculatePrice() {
+            const fromSelect = document.getElementById('fromLocation');
+            const toSelect = document.getElementById('toLocation');
+            const priceDisplay = document.getElementById('priceAmount');
+            
+            if (!fromSelect.value || !toSelect.value) {
+                alert('Please select both pickup and destination locations');
+                return;
+            }
+
+            // Clear existing markers and route
+            markers.forEach(marker => marker.remove());
+            markers = [];
+            if (routeLine) routeLine.remove();
+
+            const fromLocation = locations[fromSelect.value];
+            const toLocation = locations[toSelect.value];
+
+            // Add markers for selected locations
+            const fromMarker = L.marker([fromLocation.lat, fromLocation.lng])
+                .bindPopup(`Pickup: ${fromLocation.name}`)
+                .addTo(map);
+            const toMarker = L.marker([toLocation.lat, toLocation.lng])
+                .bindPopup(`Destination: ${toLocation.name}`)
+                .addTo(map);
+            
+            markers.push(fromMarker, toMarker);
+
+            // Draw route line
+            routeLine = L.polyline([
+                [fromLocation.lat, fromLocation.lng],
+                [toLocation.lat, toLocation.lng]
+            ], {color: '#ffd700'}).addTo(map);
+
+            // Fit map to show both markers
+            map.fitBounds(routeLine.getBounds(), {padding: [50, 50]});
+
+            // Calculate price (example calculation)
+            const distance = map.distance(
+                [fromLocation.lat, fromLocation.lng],
+                [toLocation.lat, toLocation.lng]
+            ) / 1000; // Convert to kilometers
+
+            let basePrice = 5; // Base fare
+            let pricePerKm = 1.5; // Price per kilometer
+            let totalPrice = basePrice + (distance * pricePerKm);
+
+            // Add airport surcharge if applicable
+            if (fromSelect.value === 'airport' || toSelect.value === 'airport') {
+                totalPrice += 15; // Airport surcharge
+            }
+
+            priceDisplay.textContent = `$${totalPrice.toFixed(2)}`;
+        }
+
+        // Initialize map with Plovdiv center
+        const map = L.map('map').setView([42.1354, 24.7453], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Add initial marker for TaxiService location
+        L.marker([42.1354, 24.7453])
+            .bindPopup("<b>TaxiService Plovdiv</b><br>Welcome to Plovdiv, Bulgaria!")
+            .addTo(map);
+
+        // Check login status when page loads
+        window.onload = function() {
+            checkLoginStatus();
+            // Your existing onload code...
+        };
+
+        function checkLoginStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (currentUser) {
+                // User is logged in
+                loginBtn.style.display = 'none';
+                registerBtn.style.display = 'none';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                // User is not logged in
+                loginBtn.style.display = 'inline-block';
+                registerBtn.style.display = 'inline-block';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            checkLoginStatus();
+            window.location.reload();
+        }
+
+        function toggleMenu() {
+            const hamburger = document.querySelector('.hamburger');
+            const navButtons = document.querySelector('.nav-buttons');
+            
+            hamburger.classList.toggle('active');
+            navButtons.classList.toggle('active');
+        }
+
+        // Close menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const hamburger = document.querySelector('.hamburger');
+            const navButtons = document.querySelector('.nav-buttons');
+            
+            if (!event.target.closest('.hamburger') && 
+                !event.target.closest('.nav-buttons')) {
+                hamburger.classList.remove('active');
+                navButtons.classList.remove('active');
+            }
+        });
+
+        // Close menu when clicking a nav button
+        document.querySelectorAll('.nav-buttons button').forEach(button => {
+            button.addEventListener('click', () => {
+                const hamburger = document.querySelector('.hamburger');
+                const navButtons = document.querySelector('.nav-buttons');
+                
+                hamburger.classList.remove('active');
+                navButtons.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

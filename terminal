@@ -1,0 +1,3 @@
+npx create-react-app freelance-services
+cd freelance-services
+npm install react-router-dom styled-components 

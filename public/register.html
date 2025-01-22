@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Taxi Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2d2d2d;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .auth-form {
+            background: #2d2d2d;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            width: 300px;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem 2.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #444;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: #333;
+            color: #fff;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #ffd700;
+        }
+
+        button {
+            width: 100%;
+            background-color: #ffd700;
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        button:hover {
+            background-color: #ffed4a;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="taxi.html" class="logo">
+            <i class="fas fa-taxi"></i>
+            TaxiService
+        </a>
+    </nav>
+
+    <div class="container">
+        <div class="auth-form">
+            <h2><i class="fas fa-user-plus"></i> Register</h2>
+            <div class="form-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="registerUsername" placeholder="Username">
+            </div>
+            <div class="form-group">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="registerPassword" placeholder="Password">
+            </div>
+            <button onclick="register()">
+                <i class="fas fa-user-plus"></i> Register
+            </button>
+        </div>
+    </div>
+
+    <script>
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            // Basic validation
+            if (!username || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            // Get existing users or initialize empty array
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+
+            // Check if username already exists
+            if (users.some(user => user.username === username)) {
+                alert('Username already exists');
+                return;
+            }
+
+            // Add new user
+            users.push({ username, password });
+            localStorage.setItem('users', JSON.stringify(users));
+
+            // Store current user
+            localStorage.setItem('currentUser', username);
+
+            alert('Registration successful!');
+            window.location.href = 'taxi.html'; // Redirect to main page
+        }
+    </script>
+</body>
+</html>
