@@ -10,11 +10,15 @@ Screenshots
 
 Features
 
-Taxi Booking: Order taxis with pickup and destination locations
-Price Comparison: View and compare prices before confirming orders
-Vehicle Information: Browse available cars with details like model, capacity, and features
-User Accounts: Create accounts to save favorite locations and payment methods
-Order History: Track past rides and easily reorder frequently used routes
+Taxi Booking: Order taxis with pickup and destination locations.
+
+Price Comparison: View and compare prices before confirming orders.
+
+Vehicle Information: Browse available cars with details like model, capacity, and features.
+
+User Accounts: Create accounts to save favorite locations and payment methods.
+
+Order History: Track past rides and easily reorder frequently used routes.
 
 Technologies Used
 Frontend: HTML, Java Script, CSS
